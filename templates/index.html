@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Astronomy Color Calculator</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    :root {
+        --bg: #ffffff;
+        --card: #f8f8f8;
+        --border: #cccccc;
+        --text: #000000;
+    }
+
+    .dark {
+        --bg: #121212;
+        --card: #1f1f1f;
+        --border: #333333;
+        --text: #ffffff;
+    }
+
+    .container {
+        width: 95%;
+        margin: auto;
+        padding: 20px;
+    }
+
+    .title {
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .flex {
+        display: flex;
+        gap: 20px;
+    }
+
+    .card {
+        background: var(--card);
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        flex: 1;
+    }
+
+    h3 {
+        margin-top: 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 5px;
+        font-size: 20px;
+    }
+
+    .form-row {
+        margin-bottom: 12px;
+    }
+
+    input[type=text], input[type=number], textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    input[type=file]{
+        margin-top: 4px;
+    }
+
+    .button {
+        background: #000;
+        color: #fff;
+        padding: 10px 14px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+        font-size: 15px;
+    }
+
+    .button.grey {
+        background: #444;
+        margin-bottom: 10px;
+    }
+
+    .result-table, .comp-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .result-table td, .result-table th,
+    .comp-table td, .comp-table th {
+        border: 1px solid var(--border);
+        padding: 6px;
+        text-align: center;
+    }
+
+    .img-box {
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .toggle {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #000;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+</style>
+
+<script>
+function toggleDark() {
+    document.body.classList.toggle('dark');
+}
+
+function showFields(type){
+    document.getElementById("lum_fields").style.display = (type=="lum") ? "block":"none";
+    document.getElementById("flux_fields").style.display = (type=="flux") ? "block":"none";
+    document.getElementById("mag_fields").style.display = (type=="mag") ? "block":"none";
+    document.getElementById("sed_fields").style.display = (type=="sed") ? "block":"none";
+}
+
+function clearResults() {
+    const resCard = document.querySelector('.flex .card:nth-child(2)');
+    if (!resCard) return;
+    const elements = resCard.querySelectorAll("table, img, h4");
+    elements.forEach(el => el.remove());
+}
+</script>
+
+</head>
+<body>
+
+<div class="toggle" onclick="toggleDark()">Dark Mode</div>
+
+<div class="container">
+
+    <div class="title">Astronomy Color Calculator</div>
+
+    {% if error %}
+    <div style="color:red; font-weight:bold; margin-bottom:15px;">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="flex">
+
+        <!-- INPUT PANEL -->
+        <div class="card">
+            <h3>Input</h3>
+
+            <form action="/process" method="post" enctype="multipart/form-data">
+
+                <div class="form-row">
+                    <label><input type="radio" name="input_type" value="lum" onclick="showFields('lum')" required> Luminosity</label><br>
+                    <label><input type="radio" name="input_type" value="flux" onclick="showFields('flux')"> Flux</label><br>
+                    <label><input type="radio" name="input_type" value="mag" onclick="showFields('mag')"> AB Magnitude</label><br>
+                    <label><input type="radio" name="input_type" value="sed" onclick="showFields('sed')"> SED (ASCII/FITS/URL)</label>
+                </div>
+
+                <!-- Luminosity Fields -->
+                <div id="lum_fields" style="display:none;">
+                    <div class="form-row">Luminosity (W): <input type="number" step="any" name="luminosity"></div>
+                    <div class="form-row">Distance (m): <input type="number" step="any" name="distance"></div>
+                    <div class="form-row">Temperature (K) [optional]: <input type="number" step="any" name="temperature"></div>
+                </div>
+
+                <!-- Flux Fields -->
+                <div id="flux_fields" style="display:none;">
+                    <div class="form-row">Flux (erg/s/cm²): <input type="number" step="any" name="flux_value"></div>
+                </div>
+
+                <!-- Magnitude Fields -->
+                <div id="mag_fields" style="display:none;">
+                    <div class="form-row">AB Magnitude: <input type="number" step="any" name="magnitude"></div>
+                </div>
+
+                <!-- SED Fields -->
+                <div id="sed_fields" style="display:none;">
+                    <div class="form-row">
+                        Upload SED File:
+                        <input type="file" name="sedfile">
+                    </div>
+                    <div class="form-row">
+                        OR FITS URL:
+                        <input type="text" name="fits_url" placeholder="https://.../spec.fits">
+                    </div>
+                </div>
+
+                <!-- SDSS MAG INPUTS -->
+                <h3>SDSS Catalog Magnitudes (optional)</h3>
+                <div class="form-row">u: <input type="text" name="sdss_u"></div>
+                <div class="form-row">g: <input type="text" name="sdss_g"></div>
+                <div class="form-row">r: <input type="text" name="sdss_r"></div>
+                <div class="form-row">i: <input type="text" name="sdss_i"></div>
+                <div class="form-row">z: <input type="text" name="sdss_z"></div>
+
+                <button class="button">Compute</button>
+            </form>
+        </div>
+
+        <!-- RESULTS PANEL -->
+        <div class="card">
+            <h3>Results</h3>
+
+            <!-- CLEAR RESULTS BUTTON -->
+            <button type="button" class="button grey" onclick="clearResults()">Clear Results</button>
+
+            {% if result %}
+            <table class="result-table">
+                <tr><th>Total Flux (erg/s/cm²)</th><td>{{ result.F }}</td></tr>
+                <tr><th>Magnitudes</th><td>{{ result.mags }}</td></tr>
+                <tr>
+                    <th>Colors</th>
+                    <td>
+                        u−g: {{ result.colors["u-g"] }} <br>
+                        g−r: {{ result.colors["g-r"] }} <br>
+                        r−i: {{ result.colors["r-i"] }} <br>
+                        i−z: {{ result.colors["i-z"] }}
+                    </td>
+                </tr>
+            </table>
+
+            {% if sed_plot %}
+            <div class="img-box">
+                <h4>SED Plot</h4>
+                <img src="/static/{{ sed_plot }}" width="100%">
+            </div>
+            {% endif %}
+            {% endif %}
+
+            {% if comparison %}
+            <h3>SDSS Comparison</h3>
+            <table class="comp-table">
+                <tr>
+                    <th>Band</th>
+                    <th>Synthetic</th>
+                    <th>SDSS Catalog</th>
+                    <th>Residual (syn − SDSS)</th>
+                </tr>
+                {% for b, row in comparison.items() %}
+                <tr>
+                    <td>{{ b }}</td>
+                    <td>{{ row.syn }}</td>
+                    <td>{{ row.cat }}</td>
+                    <td>{{ row.diff }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            {% if res_plot %}
+            <div class="img-box">
+                <h4>Residuals Plot</h4>
+                <img src="/static/{{ res_plot }}" width="100%">
+            </div>
+            {% endif %}
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
