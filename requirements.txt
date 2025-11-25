@@ -1,5 +1,7 @@
 flask
+gunicorn
 numpy
 astropy
 matplotlib
 requests
+
