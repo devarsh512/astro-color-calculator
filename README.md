@@ -2,7 +2,7 @@
 ### *A Synthetic Photometry Tool Using SDSS Filters*
 
 🔗 **Live Web App:**  
-https://astro-color-calculator-4dao.onrender.com
+👉 https://astro-color-calculator-4dao.onrender.com
 
 This project is a fully functional **Astronomical Photometry Calculator** that converts different types of astrophysical inputs into **synthetic SDSS magnitudes and colours**.  
 It uses real **SDSS (u, g, r, i, z) filter transmission curves**, performs **SED interpolation**, and provides **visual and numerical outputs**.
@@ -56,12 +56,41 @@ This makes it useful for:
 
 ---
 
-### 💻 **Technology Stack**
+## 🖼️ Results & Screenshots
+
+### 📌 **Dashboard**
+![Dashboard](astro_color_calculator01.jpg)
+
+---
+
+### 📌 **SED Plot**
+![SED Plot](astro_color_calculator02.jpg)
+
+---
+
+### 📌 **Comparison with SDSS**
+![SDSS Comparison](astro_color_calculator03.jpg)
+
+---
+
+## 💻 Technology Stack
+
 - **Python (Flask)** — Web framework  
 - **Astropy** — FITS reading & spectral units  
 - **NumPy** — Interpolation & integration  
 - **Matplotlib** — Scientific plots  
 - **Gunicorn** — Production server  
-- **Render.com** — Deployment platform  
+- **Render.com** — Cloud deployment  
 
 ---
+
+## 👨‍💻 Author
+
+**Devarsh Prajapati**  
+Aspiring Data Scientist | Astronomy & Python Enthusiast    
+
+*Focused on bridging scientific computation with intuitive visual tools.*
+
+---
+
+If you like this, you can ⭐ the repo on GitHub!  
